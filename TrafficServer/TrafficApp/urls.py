@@ -2,5 +2,5 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.anomaly_detection_view, name='traffic_handler'),
+    path('', views.fetch_traffic_data, name='fetch_traffic_data'),
 ]

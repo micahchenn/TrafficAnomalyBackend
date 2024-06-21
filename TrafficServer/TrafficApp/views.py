@@ -8,20 +8,19 @@ import io
 import base64
 from datetime import datetime
 
-def fetch_traffic_data(point, historical=False, start_time=None, end_time=None):
-    tomtom_api_key = os.getenv('TOMTOM_API_KEY')
-    if historical and start_time and end_time:
-        url = f"https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/historical/10/json?point={point}&key={tomtom_api_key}&startTime={start_time}&endTime={end_time}"
-    else:
-        url = f"https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point={point}&key={tomtom_api_key}"
-    
+@csrf_exempt
+def fetch_traffic_data(request):
+    TOMTOM_API_KEY = os.environ.get('TOMTOM_API_KEY', ' ')  # Replace with your TomTom API key
+    data = json.loads(request.body)
+    point = data.get('point', '29.72852,-95.4686')
+    historical = data.get('historical', False)
+    start_time = data.get('start_time', '2023-01-01T00:00:00Z')
+    end_time = data.get('end_time', '2023-12-31T23:59:59Z')
+
+    url = f"https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?key={TOMTOM_API_KEY}&point={point}"
     response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Error fetching traffic data: {response.status_code}")
-        print(response.text)  # Print the error message for debugging
-        return None
+    print(response.json)
+    return JsonResponse(response.json())
 
 def plot_traffic_data(data):
     times = [datetime.strptime(item['time'], "%Y-%m-%dT%H:%M:%SZ") for item in data['flowSegmentData']['historicalData']]
